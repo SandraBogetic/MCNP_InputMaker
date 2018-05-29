@@ -1,0 +1,63 @@
+C
+C ### Case Information Variable and constants ###
+C
+C ### Cell Cards ###
+C case CELL 
+C
+# <pelld = 10.1:10.67 >
+# <mclad = 1, 2, 3, 4, 5, 6>
+# <x1 = 5, 50, 51, 52>
+# <x2 = 6, 60, 61, 62>
+#<cellmat = 1 2 >   #combin_for cell 1 and cell 2
+# <pelletrad = 0.05:0.56 >
+# <U235enr% = 0.1:0.75>
+C
+C Cell Cards:
+C PWR Single Pin
+%*******CELL*******
+1 1 -<pelld>          -1 -10 20     imp:n=1 $FUEL 
+2 <mclad> -<@cladd>   1 -2  -10 20  imp:n=1 $CLAD (Add: vol=… volume of the cells!)
+5 3       2 -<x1> <x2> -7 8 -10 20  imp:n=1 $WATER (Add: vol=… volume of the cells!)
+6 0         <x1>:-<x2>:7:-8:10:-20  imp:n=0 $EXTERNAL (neutron killed)
+
+%*******SURF***************
+c Fuel Rod Dimension
+1   cz  <pelletrad>          $Pellet Radius
+2   cz  {0.56 - <pelletrad>} $cladding radius
+c  Unit Cell , Basic Lattice Cell
+*5  px  0.57
+*50 px  0.54
+*51 px  0.55
+*52 px  0.56
+*6  px -0.57
+*60 px -0.54
+*61 px -0.55
+*62 px -0.56
+*7  py  0.57
+*8  py -0.57
+c Axial Limits
+*10 pz  150.0
+*20 pz -150.0
+C
+C Cell Cards
+%********MAT***********
+m1    8016.78c 2.0             $Fuel UO2 
+     92235.63c <U235enr%>      $Fuel UO2 (%enrich)
+     92238.63c {1- <U235enr%>} $Fuel UO2
+%******external material files
+mat_file 
+c ----------Tallies -----
+fc4 Fflux in fuel , clad, water
+f4:n     <@m1>       $@m1 tally all material 1 cells 
+e4:n     1e-6 1. 20. $energy bins (here only fast and thermal)
+fc14 Reaction rates in the fuel and its components
+f14:n    1
+fm14     (1  1 (-2) (-6))
+fc34 Absorption rate in water
+f34:n    4
+fm34     1  4  (-2) 
+c -----------------
+kcode     1000 1.00 50 250  $#particles keff guess cycles and particles skipped
+ksrc      0. 0. 0.          $location of the source 
+print
+mode n $use neutrons
